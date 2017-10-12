@@ -1,0 +1,26 @@
+Package: zapstRR
+Title: ZoologicAl Package for Randomized Response Technique (RRT)
+Version: 0.0.0.9000
+Date: 2017-10-06
+Authors@R: c(person("Charlotte", "Chang", email = "chc2@alumni.princeton.edu", role = c("aut", "cre")),
+             person("Maarten J.L.F.", "Cruyff", email="m.cruyff@uu.nl", role="aut"))
+Maintainer: Charlotte H. Chang <chc2@alumni.princeton.edu>
+Description: zapstRR enables conservation practitioners and other users of randomized response technique 
+    to analyze univariate and multivariate RRT data. The analyses include: 
+    univariate RRT modeling (prevalence and logistic regression),
+    sum score modeling (the frequency of respondents possessing an ordinal sum of sensitive traits),
+    and item response technique multivariate modeling. We supplement the analyses with a non-parametric bootstrap estimator,
+    which can provide confidence limits for parameters when the dataset suffers from inadequate information.
+    We also provide a power analysis for RRT survey design and a function to simulate data under the three RRT models.
+Depends: R (>= 3.3.1)
+License: GPL (>= 2)
+Encoding: UTF-8
+LazyData: true
+RoxygenNote: 6.0.1
+Imports: stats,
+    MASS
+Suggests: knitr,
+    rmarkdown,
+    graphics,
+    grDevices
+VignetteBuilder: knitr
