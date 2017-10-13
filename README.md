@@ -18,8 +18,8 @@ Additionally, `zapstRR` contains these functions:
 
 zapstRR has two example datasets:
 
-* `huntRRdata`: RRT data on barbet (**Psilopogon** spp.), bulbul (**Pycnonotus**, **Hypsipetes**, **Iole**, and **Ixos** spp.), and partridge (**Arborophila** spp.) hunting with respondent age (standardized to z-scores) as a covariate (Chang **et al.** 2017, in prep.)
-* `RRdata`: illicit or sensitive behaviors among university undergraduates (e.g. bullying, drug usage) (adapted from Cobo Rodriguez **et al.** 2015; please see their package [RRTCS](https://cran.r-project.org/web/packages/RRTCS/index.html) for more information). 
+* `huntRRdata`: RRT data on barbet (*Psilopogon* spp.), bulbul (*Pycnonotus*, *Hypsipetes*, *Iole*, and *Ixos* spp.), and partridge (*Arborophila* spp.) hunting with respondent age (standardized to z-scores) as a covariate (Chang *et al.* 2017, in prep.)
+* `RRdata`: illicit or sensitive behaviors among university undergraduates (e.g. bullying, drug usage) (adapted from Cobo Rodriguez *et al.* 2015; please see their package [RRTCS](https://cran.r-project.org/web/packages/RRTCS/index.html) for more information). 
 
 ## Downloading
 
@@ -28,3 +28,7 @@ At present, the package can be downloaded using [devtools](https://cran.r-projec
 library("devtools")
 install_github("charlottehchang/zapstRR")
 ``` 
+
+## Vignette
+
+Currently, the package vignette can be found at [RPubs](http://rpubs.com/chwchang/zapstRR).
