@@ -1,6 +1,6 @@
 ---
 title: "Vignette for package zapstRR"
-author: "Charlotte Chang"
+author: "Charlotte H. Chang"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 bibliography: ~/Google Drive/TexDocs/library.bib
@@ -36,8 +36,8 @@ Additionally, `zapstRR` contains these functions:
 
 In addition, zapstRR has two example datasets:
 
-* `huntRRdata`: RRT data on barbet (**Psilopogon** spp.), bulbul (**Pycnonotus**, **Hypsipetes**, **Iole**, and **Ixos** spp.), and partridge (**Arborophila** spp.) hunting with respondent age (standardized to z-scores) as a covariate.
-* `RRdata`: illicit or sensitive behaviors among university undergraduates (e.g. bullying, drug usage).
+* `huntRRdata`: RRT data on barbet (*Psilopogon* spp.), bulbul (*Pycnonotus*, *Hypsipetes*, *Iole*, and *Ixos* spp.), and partridge (*Arborophila* spp.) hunting with respondent age (standardized to z-scores) as a covariate.
+* `RRdata`: illicit or sensitive behaviors among university undergraduates (e.g. bullying, drug usage; adapted from the package [RRTCS](https://cran.r-project.org/web/packages/RRTCS/index.html)).
 
 For more information, please see [@Chang2017RRT].
 
@@ -192,7 +192,7 @@ signif(uniMLEs,3)
 RRirt(y=huntRRdata[,c(3,1,2)], x=huntRRdata['Age'], p00=p00, p11=p11)
 ```
 
-Contrast this $\beta_{age}$ against the one generated above for the univariate barbet logistic regression, which failed to even return a standard error: `r RRunivariate(y=huntRRdata['Barbet'], x=huntRRdata['Age'], p00=p00, p11=p11)$estimates[2,]`.
+Contrast this $\beta_{age}$ against the one generated above for the univariate barbet logistic regression, which failed to even return a standard error: `RRunivariate(y=huntRRdata['Barbet'], x=huntRRdata['Age'], p00=p00, p11=p11)$estimates[2,]`.
 
 ### Evasive responses
 
@@ -244,7 +244,7 @@ for (j in 2:length(prev)) {
 }
 legend("bottomright",legend=prev,title=expression(paste("Prevalence: ",pi[alt],"")),lty=rep(1,length(prev)),bty="n",horiz=TRUE, col=colors, title.adj=1, lwd=1.25)
 
-par(op) # reset plotting parameters
+suppressWarnings( par(op) ) # reset plotting parameters
 ```
 
 ## RRT data simulation
