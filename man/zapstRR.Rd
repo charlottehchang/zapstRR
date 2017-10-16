@@ -5,11 +5,14 @@
 \alias{zapstRR}
 \alias{zapstRR-package}
 \alias{zapstRR-package}
-\title{zapstRR: A package for performing statistical inference on univariate and multivariate Randomized Response Technique (RRT) data}
+\title{zapstRR: ZoologicAl Package (Zap!) for Randomized Response Technique Analysis}
 \description{
-zapstRR provides three categories of functions: RRT analysis, power analysis, and data simulation.
+zapstRR: A package for performing statistical inference on univariate and multivariate Randomized Response Technique (RRT) data
 }
 \details{
+zapstRR provides three categories of functions: RRT analysis, power analysis, and data simulation.
+
+
 \tabular{ll}{
 Package: \tab zapstRR\cr
 Type: \tab Package\cr
@@ -36,3 +39,7 @@ The RRT analysis functions are as follows:
 In addition, \code{\link{powerRRT}} performs power analysis for study designs and \code{\link{RRsimulate}} can simulate example RRT data. Two datasets are provided: \code{\link{huntRRdata}}, a case study on illegal hunting in Southwest China, and \code{\link{RRdata}}, which investigates sensitive behaviors among university students.
 }
 
+\author{
+Charlotte H. Chang \email{chc2@alumni.princeton.edu} and Maarten J.L.F. Cruyff \email{m.cruyff@uu.nl}
+}
+\keyword{package}
