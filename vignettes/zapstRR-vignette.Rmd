@@ -1,6 +1,6 @@
 ---
 title: "Vignette for package zapstRR"
-author: "Charlotte H. Chang"
+author: "Charlotte H. Chang & Maarten J.L.F. Cruyff"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 bibliography: ~/Google Drive/TexDocs/library.bib
@@ -21,7 +21,7 @@ Within conservation science, the randomized response technique (RRT) [@warner196
 We aim to improve the functionality of RRT survey design and analysis by including the following functions:
 
 * `RRunivariate`: analysis (prevalence and logistic regression) of single RRT items
-* `RRsumscore`: prevalence and ordinal regression of the sums cores of multiple RRT items
+* `RRsumscore`: prevalence and ordinal regression of the sum scores of multiple RRT items
 * `RRirt`: multivariate (two or more RRT items) prevalence and regression analysis
     + `RRirt` can also be used to estimate evasive response bias--or the proportion of individuals that consistently refuse to answer yes honestly or when prompted by the randomizer.
 
@@ -36,10 +36,10 @@ Additionally, `zapstRR` contains these functions:
 
 In addition, zapstRR has two example datasets:
 
-* `huntRRdata`: RRT data on barbet (*Psilopogon* spp.), bulbul (*Pycnonotus*, *Hypsipetes*, *Iole*, and *Ixos* spp.), and partridge (*Arborophila* spp.) hunting with respondent age (standardized to z-scores) as a covariate.
+* `huntRRdata`: RRT data on hunting barbet (*Psilopogon* spp.), bulbul (*Pycnonotus*, *Hypsipetes*, *Iole*, and *Ixos* spp.), and partridge (*Arborophila* spp.) with normalized respondent age as a covariate.
 * `RRdata`: illicit or sensitive behaviors among university undergraduates (e.g. bullying, drug usage; adapted from the package [RRTCS](https://cran.r-project.org/web/packages/RRTCS/index.html)).
 
-For more information, please see [@Chang2017RRT].
+For more information, please see @Chang2017RRT.
 
 ## Univariate analysis & bootstrapping
 
@@ -60,33 +60,33 @@ data("huntRRdata")
 p00 <- p11 <- 5/6 # p00: Probability of observing no conditional on a true no; p11: Probability of observing yes conditional on a true yes.
 
 ###==================================================================================
-## Univariate prevalence analysis: Barbet hunting
+## Univariate prevalence analysis: Bulbul hunting
 ###==================================================================================
 
-RRunivariate(y=huntRRdata['Barbet'], p00=p00, p11=p11)$estimates
+RRunivariate(y=huntRRdata['Bulbul'], p00=p00, p11=p11)$estimates
 ```
 
-We see that about 1.2\% of the surveyed adult men in Southwest China hunted barbets, with a standard error of 4.1\%. The 95\% confidence interval for the proportion of individuals who hunted barbets was $[0, 9.3]\%$. 
+We see that about 19.4\% of the surveyed adult men in Southwest China hunted barbets, with a standard error of 5\%. The 95\% confidence interval for the proportion of individuals who hunted barbets was $[9.7, 29.2]\%$. 
 
-Below, we evaluate whether or not age predicts barbet hunting:
+Below, we evaluate whether or not age predicts bulbul hunting:
 
 ```{r barbet_glm}
 ###==================================================================================
 ## Univariate logistic regression: Barbet hunting
 ###==================================================================================
-RRunivariate(y=huntRRdata[,'Barbet'], x=huntRRdata['Age'], p00=p00, p11=p11)$estimates
+RRunivariate(y=huntRRdata[,'Bulbul'], x=huntRRdata['Age'], p00=p00, p11=p11)$estimates
 ```
 
-We see that there is inadequate power to properly estimate the effect of age on the probability of hunting barbets. By design, the package will return `NaN` when the information matrix is singular. In this situation, we can use `RRbootstrap` to generate non-parametric bootstrapped confidence intervals.
+We see that there is adequate power to properly estimate the effect of age on the probability of hunting bulbuls. (This is not true for the other two bird species.) However, it is ultimately unclear if younger individuals exhibit a greater propensity to hunt bulbuls. By design, the package will return `NaN` when the information matrix is singular. In this situation, we can use `RRbootstrap` to generate non-parametric bootstrapped confidence intervals.
 
 ```{r barbet_glm_boot}
 ###==================================================================================
 ## Univariate logistic regression bootstrap: Barbet hunting
 ###==================================================================================
-RRbootstrap(model='univariate',y=huntRRdata[,1], x=huntRRdata['Age'], p00=p00, p11=p11, reps=50)
+RRbootstrap(model='univariate',y=huntRRdata[,'Bulbul'], x=huntRRdata['Age'], p00=p00, p11=p11, reps=50)
 ```
 
-The bootstrap call indicates that $\beta_{age}$ has a mean of 56.1, and 95\% confidence limits of $[-25.7, 174.8]$. Note that the number of bootstrap replicates is low (`reps=50`); we generally recommend 500 or more to generate more robust estimates.
+The bootstrap call indicates that $\beta_{age}$ has a mean of -5.2, and 95\% confidence limits of $[-10, 0.5]$. Note that the number of bootstrap replicates is low (`reps=50`); we generally recommend 500 or more to generate more robust estimates.
 
 ## Sum score modeling
 
@@ -192,11 +192,11 @@ signif(uniMLEs,3)
 RRirt(y=huntRRdata[,c(3,1,2)], x=huntRRdata['Age'], p00=p00, p11=p11)
 ```
 
-Contrast this $\beta_{age}$ against the one generated above for the univariate barbet logistic regression, which failed to even return a standard error: `RRunivariate(y=huntRRdata['Barbet'], x=huntRRdata['Age'], p00=p00, p11=p11)$estimates[2,]`.
+Contrast this $\beta_{age}$ against the one returned from a univariate barbet logistic regression, which fails to produce a standard error: `RRunivariate(y=huntRRdata['Barbet'], x=huntRRdata['Age'], p00=p00, p11=p11)$estimates[2,]`.
 
 ### Evasive responses
 
-In certain locales, despite implementing RRT, respondents may still feel uneasy answering `yes`, as they may fear reputational or legal repercussions. This phenomenon has been termed **evasive response bias** and the IRT model can correct prevalence and regression analyses by controlling for the rate of one-way lying (refusing to answer `yes`: `noncompliance=TRUE`). Note that this analysis is not possible with `RRunivariate` or `RRsumscore`. `RRbootstrap` can return bootstrap estimates of the IRT model with evasive response bias.
+In certain locales, despite implementing RRT, respondents may still feel uneasy answering `yes`, as they may fear reputational or legal repercussions. This phenomenon has been termed **evasive response bias** (represented by parameter $\phi$, or `phi`) and the IRT model can correct prevalence and regression analyses by controlling for the rate of one-way lying (refusing to answer `yes`: `noncompliance=TRUE`). Note that this analysis is not possible with `RRunivariate` or `RRsumscore`. `RRbootstrap` can return bootstrap estimates of the IRT model with evasive response bias.
 
 ```{r irt_phi}
 ###===========================================================================
@@ -208,6 +208,9 @@ RRirt(y=huntRRdata[,1:3], p00=p00, p11=p11, noncompliance = TRUE)
 
 ## IRT regression
 RRirt(y=huntRRdata[,1:3], x=huntRRdata['Age'],p00=p00, p11=p11, noncompliance = TRUE)
+
+## Bootstrap
+RRbootstrap(model="irt", y=huntRRdata[,1:3], x=huntRRdata['Age'],p00=p00, p11=p11, noncompliance = TRUE, reps=50)
 ```
 
 ## Power analysis
