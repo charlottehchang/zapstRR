@@ -34,6 +34,9 @@
 #'
 #' @docType package
 #' @name zapstRR
+#' @title zapstRR: ZoologicAl Package (Zap!) for Randomized Response Technique Analysis
+#' @author Charlotte H. Chang \email{chc2@@alumni.princeton.edu} and Maarten J.L.F. Cruyff \email{m.cruyff@@uu.nl}
+#' @keywords package
 #'
 #' @import stats
 #'
