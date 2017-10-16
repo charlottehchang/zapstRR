@@ -21,6 +21,7 @@ Suggests: \tab knitr\cr
 License: \tab GPL (>= 2)\cr
 LazyLoad: \tab yes\cr
 URL: \tab \url{https://github.com/charlottehchang/zapstRR}\cr
+Vignette: \tab \url{http://rpubs.com/chwchang/318110}\cr
 }
 }
 \section{Package Functions}{
