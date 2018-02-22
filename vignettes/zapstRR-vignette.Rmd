@@ -12,7 +12,7 @@ vignette: >
 
 # ZoologicAl package (ZAP!) for RRT analysis in ecology and conservation
 
-Contact: <chc2@alumni.princeton.edu>
+Contact: <chchang@nimbios.org>
 
 ## Introduction
 
@@ -31,6 +31,7 @@ Additionally, `zapstRR` contains these functions:
 
 * `RRbootstrap`: parameter estimation using non-parametric bootstrapping for all three models: `univariate`, `sumscore`, and `irt`.
     + `RRboostrap` permits users to estimate confidence intervals when there is insufficient information to otherwise use maximum likelihood estimation to determine the standard error of a parameter.
+* `RRgof`: parametric bootstrap estimates of $\chi^2$ statistics for goodness-of-fit
 * `powerRRT`: power analysis of study designs
 * `RRsimulate`: simulation of RRT data under the three models: `univariate`, `sumscore`, and `irt`.
 
@@ -43,9 +44,9 @@ For more information, please see @Chang2017RRT.
 
 ## Univariate analysis & bootstrapping
 
-`RRunivariate` can be used to evaluate the prevalence or the factors associated with a specific sensitive behavior. For instance, with the `huntRRdata`, one could assess what proportion of adult men hunted barbets in Southwest China. One could also determine whether or not age affected barbet hunting.
+`RRunivariate` can be used to evaluate the prevalence or the factors associated with a specific sensitive behavior. For instance, with the `huntRRdata`, one could assess what proportion of adult men hunted bulbuls in Southwest China. One could also determine whether or not age affected bulbul hunting.
 
-```{r uni_barbet}
+```{r uni_bulbul}
 ###==================================================================================
 ## Preparation
 ###==================================================================================
@@ -66,27 +67,43 @@ p00 <- p11 <- 5/6 # p00: Probability of observing no conditional on a true no; p
 RRunivariate(y=huntRRdata['Bulbul'], p00=p00, p11=p11)$estimates
 ```
 
-We see that about 19.4\% of the surveyed adult men in Southwest China hunted barbets, with a standard error of 5\%. The 95\% confidence interval for the proportion of individuals who hunted barbets was $[9.7, 29.2]\%$. 
+We see that about 19.4\% of the surveyed adult men in Southwest China hunted bulbuls, with a standard error of 5\%. The 95\% confidence interval for the proportion of individuals who hunted bulbuls was $[9.7, 29.2]\%$. 
 
 Below, we evaluate whether or not age predicts bulbul hunting:
 
-```{r barbet_glm}
+```{r bulbul_glm}
 ###==================================================================================
-## Univariate logistic regression: Barbet hunting
+## Univariate logistic regression: Bulbul hunting
 ###==================================================================================
-RRunivariate(y=huntRRdata[,'Bulbul'], x=huntRRdata['Age'], p00=p00, p11=p11)$estimates
+RRunivariate(y=huntRRdata['Bulbul'], x=huntRRdata['Age'], p00=p00, p11=p11)$estimates
 ```
 
-We see that there is adequate power to properly estimate the effect of age on the probability of hunting bulbuls. (This is not true for the other two bird species.) However, it is ultimately unclear if younger individuals exhibit a greater propensity to hunt bulbuls. By design, the package will return `NaN` when the information matrix is singular. In this situation, we can use `RRbootstrap` to generate non-parametric bootstrapped confidence intervals.
+We see that there is adequate power to properly estimate the effect of age on the probability of hunting bulbuls. (This is not true for the other two bird species: try the command `RRunivariate(y=huntRRdata['Barbet'], x=huntRRdata['Age'], p00=p00, p11=p11)$estimates` to see.) The package will return `NaN` when the information matrix is singular. In this situation, we can use `RRbootstrap` to generate non-parametric bootstrapped confidence intervals.
 
 ```{r barbet_glm_boot}
 ###==================================================================================
 ## Univariate logistic regression bootstrap: Barbet hunting
 ###==================================================================================
-RRbootstrap(model='univariate',y=huntRRdata[,'Bulbul'], x=huntRRdata['Age'], p00=p00, p11=p11, reps=50)
+# Barbet has low prevalence, which combined with the limited sample size (n=189),
+# precludes SE identification in RRunivariate.
+RRunivariate(y=huntRRdata['Barbet'], x=huntRRdata['Age'], p00=p00, p11=p11)$estimates
+
+# Compare the results against the bootstrap estimate:
+RRbootstrap(model='univariate',y=huntRRdata[,'Barbet'], x=huntRRdata['Age'], p00=p00, p11=p11, reps=50)
 ```
 
 The bootstrap call indicates that $\beta_{age}$ has a mean of -5.2, and 95\% confidence limits of $[-10, 0.5]$. Note that the number of bootstrap replicates is low (`reps=50`); we generally recommend 500 or more to generate more robust estimates.
+
+We can also use the function `RRgof` to calculate the goodness of fit for the three RRT models in the package. For example, we demonstrate how to use `RRgof` on the bulbul logistic regression model above.
+
+```{r bulbul-GLM-gof}
+###==================================================================================
+## Goodness of fit test example: Bulbul hunting
+###==================================================================================
+reps <- 500
+RRgof(model="univariate", y=huntRRdata['Bulbul'], x=huntRRdata['Age'], p00=p00, p11=p11, reps=reps)
+```
+
 
 ## Sum score modeling
 
