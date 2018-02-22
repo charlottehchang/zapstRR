@@ -102,8 +102,10 @@ We can also use the function `RRgof` to calculate the goodness of fit for the th
 ###==================================================================================
 reps <- 500
 RRgof(model="univariate", y=huntRRdata['Bulbul'], x=huntRRdata['Age'], p00=p00, p11=p11, reps=reps)
-```
 
+# For more information use the command below. (Delete the leading hash symbol, #)
+# ?RRgof 
+```
 
 ## Sum score modeling
 
