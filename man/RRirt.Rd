@@ -10,7 +10,7 @@ RRirt(y, x = NULL, p00, p11, noncompliance = F, n.round = 3,
 \arguments{
 \item{y}{Matrix or data frame of observed responses for two or more RRT items}
 
-\item{x}{Predictor variable values (matrix or data frame). An intercept is automatically added.}
+\item{x}{Predictor variable values (matrix or data frame).}
 
 \item{p00}{The conditional classification probability \eqn{y=0|z=0} (observed no conditional on true no)}
 
