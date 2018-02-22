@@ -3,7 +3,7 @@
 #' @description \code{RRsumscore} estimates (1) the prevalence of 0..K sensitive traits, (2) ordinal regression when a matrix or data frame of predictor variables is provided.
 #'
 #' @param y Matrix or data frame of observed responses for K RRT items
-#' @param x Predictor variable values (matrix or data frame). An intercept is automatically added.
+#' @param x Predictor variable values (matrix or data frame).
 #' @param p00 The conditional classification probability \eqn{y=0|z=0} (observed no conditional on true no)
 #' @param p11 The conditional classification probability \eqn{y=1|z=1} (observed yes conditional on true yes)
 #' @param n.round Number of digits for rounding estimates (default is \code{n.round=3}).
