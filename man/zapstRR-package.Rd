@@ -34,11 +34,12 @@ The RRT analysis functions are as follows:
      \item \code{\link{RRsumscore}}: Prevalence and ordinal regression for sum scores of RRT items
      \item \code{\link{RRirt}}: Prevalence and multivariate regression for two or more RRT items using item response theory
      \item \code{\link{RRbootstrap}}: Nonparametric bootstrap estimates of confidence intervals for the three models above.
+     \item \code{\link{RRgof}}: Parametric bootstrap \eqn{\chi^2} goodness-of-fit estimates for the three RRT models.
 }
 In addition, \code{\link{powerRRT}} performs power analysis for study designs and \code{\link{RRsimulate}} can simulate example RRT data. Two datasets are provided: \code{\link{huntRRdata}}, a case study on illegal hunting in Southwest China, and \code{\link{RRdata}}, which investigates sensitive behaviors among university students.
 }
 
 \author{
-Charlotte H. Chang \email{chc2@alumni.princeton.edu} and Maarten J.L.F. Cruyff \email{m.cruyff@uu.nl}
+Charlotte H. Chang \email{chchang@nimbios.org} and Maarten J.L.F. Cruyff \email{m.cruyff@uu.nl}
 }
 \keyword{package}
