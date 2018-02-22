@@ -57,7 +57,7 @@ Cobo Rodriguez, B., del Mar Rueda Garcia, M., Arcos Cebrian, A. (2015).
  \url{https://CRAN.R-project.org/package=RRTCS}
 }
 \seealso{
-\code{\link[RRTCS]{HorvitzData}} for the original RRdata source,
+\code{\link[RRTCS]{HorvitzDataRealSurvey}} for the original RRdata source,
 \code{huntRRdata} for RRT data on illegal hunting in Southwest China.
 }
 \keyword{datasets}
