@@ -3,7 +3,7 @@
 #' @description \code{RRirt} estimates (1) the prevalence of a set of sensitive traits, and (2) performs logistic regression for multivariate RRT data (2 or more sensitive traits) when predictor variables are provided, and can specify question noncompliance (one-sided lying to avoid admitting yes).
 #'
 #' @param y Matrix or data frame of observed responses for two or more RRT items
-#' @param x Predictor variable values (matrix or data frame). An intercept is automatically added.
+#' @param x Predictor variable values (matrix or data frame).
 #' @param p00 The conditional classification probability \eqn{y=0|z=0} (observed no conditional on true no)
 #' @param p11 The conditional classification probability \eqn{y=1|z=1} (observed yes conditional on true yes)
 #' @param noncompliance Should the model specify question noncompliance (one-sided lying to avoid saying "yes")? \code{FALSE} (default) or \code{TRUE}.
