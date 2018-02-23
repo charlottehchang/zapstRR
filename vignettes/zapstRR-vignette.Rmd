@@ -3,7 +3,7 @@ title: "Vignette for package zapstRR"
 author: "Charlotte H. Chang & Maarten J.L.F. Cruyff"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
-bibliography: ~/Google Drive/TexDocs/library.bib
+bibliography: /Users/Char/GoogleDrive/TexDocs/SDH.bib
 vignette: >
   %\VignetteIndexEntry{Vignette Title}
   %\VignetteEngine{knitr::rmarkdown}
@@ -40,7 +40,7 @@ In addition, zapstRR has two example datasets:
 * `huntRRdata`: RRT data on hunting barbet (*Psilopogon* spp.), bulbul (*Pycnonotus*, *Hypsipetes*, *Iole*, and *Ixos* spp.), and partridge (*Arborophila* spp.) with normalized respondent age as a covariate.
 * `RRdata`: illicit or sensitive behaviors among university undergraduates (e.g. bullying, drug usage; adapted from the package [RRTCS](https://cran.r-project.org/web/packages/RRTCS/index.html)).
 
-For more information, please see @Chang2017RRT.
+For more information, please see @Chang2018RRT.
 
 ## Univariate analysis & bootstrapping
 
@@ -100,8 +100,9 @@ We can also use the function `RRgof` to calculate the goodness of fit for the th
 ###==================================================================================
 ## Goodness of fit test example: Bulbul hunting
 ###==================================================================================
-reps <- 500
-RRgof(model="univariate", y=huntRRdata['Bulbul'], x=huntRRdata['Age'], p00=p00, p11=p11, reps=reps)
+reps <- 50 # This should be increased for substantive analyses; kept at this low number for convenience
+gof.bulbul <- RRgof(model="univariate", y=huntRRdata['Bulbul'], x=huntRRdata['Age'], p00=p00, p11=p11, reps=reps)
+gof.bulbul$gof.test.result
 
 # For more information use the command below. (Delete the leading hash symbol, #)
 # ?RRgof 
