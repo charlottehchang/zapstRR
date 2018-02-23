@@ -2,7 +2,7 @@ Package: zapstRR
 Title: ZoologicAl Package for Randomized Response Technique (RRT)
 Version: 0.0.0.9000
 Date: 2017-10-06
-Authors@R: c(person("Charlotte", "Chang", email = "chc2@alumni.princeton.edu", role = c("aut", "cre")),
+Authors@R: c(person("Charlotte", "Chang", email = "chchang@nimbios.org", role = c("aut", "cre")),
              person("Maarten J.L.F.", "Cruyff", email="m.cruyff@uu.nl", role="aut"))
 Maintainer: Charlotte H. Chang <chc2@alumni.princeton.edu>
 Description: zapstRR enables conservation practitioners and other users of randomized response technique 
