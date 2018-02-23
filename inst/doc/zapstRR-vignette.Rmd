@@ -1,0 +1,288 @@
+---
+title: "Vignette for package zapstRR"
+author: "Charlotte H. Chang & Maarten J.L.F. Cruyff"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+bibliography: /Users/Char/GoogleDrive/TexDocs/SDH.bib
+vignette: >
+  %\VignetteIndexEntry{Vignette Title}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+# ZoologicAl package (ZAP!) for RRT analysis in ecology and conservation
+
+Contact: <chchang@nimbios.org>
+
+## Introduction
+
+Within conservation science, the randomized response technique (RRT) [@warner1965randomized] has become an increasingly popular questioning technique to assess the prevalence of illegal conservation crimes (e.g. poaching, illegal blast fishing, etc.) However, these data are challenging to analyze. Although extensive research in sociological and political methods and statistics have addressed a variety of techniques to analyze RRT data, many of these approaches have not yet been used outside of these fields. 
+
+We aim to improve the functionality of RRT survey design and analysis by including the following functions:
+
+* `RRunivariate`: analysis (prevalence and logistic regression) of single RRT items
+* `RRsumscore`: prevalence and ordinal regression of the sum scores of multiple RRT items
+* `RRirt`: multivariate (two or more RRT items) prevalence and regression analysis
+    + `RRirt` can also be used to estimate evasive response bias--or the proportion of individuals that consistently refuse to answer yes honestly or when prompted by the randomizer.
+
+The three functions above take the same input call: `(y = Response Data, x = Predictor Data, p00 = Probability of observing No conditional on a true No, p11 = Probability of observing Yes conditional on a true Yes)`. Note that if nothing is provided for `x`, then the functions will return proportions (i.e. the percentage of respondents who exhibited a specific sensitive trait, or possessed some ordinal sum of traits).
+
+Additionally, `zapstRR` contains these functions:
+
+* `RRbootstrap`: parameter estimation using non-parametric bootstrapping for all three models: `univariate`, `sumscore`, and `irt`.
+    + `RRboostrap` permits users to estimate confidence intervals when there is insufficient information to otherwise use maximum likelihood estimation to determine the standard error of a parameter.
+* `RRgof`: parametric bootstrap estimates of $\chi^2$ statistics for goodness-of-fit
+* `powerRRT`: power analysis of study designs
+* `RRsimulate`: simulation of RRT data under the three models: `univariate`, `sumscore`, and `irt`.
+
+In addition, zapstRR has two example datasets:
+
+* `huntRRdata`: RRT data on hunting barbet (*Psilopogon* spp.), bulbul (*Pycnonotus*, *Hypsipetes*, *Iole*, and *Ixos* spp.), and partridge (*Arborophila* spp.) with normalized respondent age as a covariate.
+* `RRdata`: illicit or sensitive behaviors among university undergraduates (e.g. bullying, drug usage; adapted from the package [RRTCS](https://cran.r-project.org/web/packages/RRTCS/index.html)).
+
+For more information, please see @Chang2018RRT.
+
+## Univariate analysis & bootstrapping
+
+`RRunivariate` can be used to evaluate the prevalence or the factors associated with a specific sensitive behavior. For instance, with the `huntRRdata`, one could assess what proportion of adult men hunted bulbuls in Southwest China. One could also determine whether or not age affected bulbul hunting.
+
+```{r uni_bulbul}
+###==================================================================================
+## Preparation
+###==================================================================================
+
+## Load the package
+library(zapstRR)
+
+## Load the data
+data("huntRRdata")
+
+## Study design parameters
+p00 <- p11 <- 5/6 # p00: Probability of observing no conditional on a true no; p11: Probability of observing yes conditional on a true yes.
+
+###==================================================================================
+## Univariate prevalence analysis: Bulbul hunting
+###==================================================================================
+
+RRunivariate(y=huntRRdata['Bulbul'], p00=p00, p11=p11)$estimates
+```
+
+We see that about 19.4\% of the surveyed adult men in Southwest China hunted bulbuls, with a standard error of 5\%. The 95\% confidence interval for the proportion of individuals who hunted bulbuls was $[9.7, 29.2]\%$. 
+
+Below, we evaluate whether or not age predicts bulbul hunting:
+
+```{r bulbul_glm}
+###==================================================================================
+## Univariate logistic regression: Bulbul hunting
+###==================================================================================
+RRunivariate(y=huntRRdata['Bulbul'], x=huntRRdata['Age'], p00=p00, p11=p11)$estimates
+```
+
+We see that there is adequate power to properly estimate the effect of age on the probability of hunting bulbuls. (This is not true for the other two bird species: try the command `RRunivariate(y=huntRRdata['Barbet'], x=huntRRdata['Age'], p00=p00, p11=p11)$estimates` to see.) The package will return `NaN` when the information matrix is singular. In this situation, we can use `RRbootstrap` to generate non-parametric bootstrapped confidence intervals.
+
+```{r barbet_glm_boot}
+###==================================================================================
+## Univariate logistic regression bootstrap: Barbet hunting
+###==================================================================================
+# Barbet has low prevalence, which combined with the limited sample size (n=189),
+# precludes SE identification in RRunivariate.
+RRunivariate(y=huntRRdata['Barbet'], x=huntRRdata['Age'], p00=p00, p11=p11)$estimates
+
+# Compare the results against the bootstrap estimate:
+RRbootstrap(model='univariate',y=huntRRdata[,'Barbet'], x=huntRRdata['Age'], p00=p00, p11=p11, reps=50)
+```
+
+The bootstrap call indicates that $\beta_{age}$ has a mean of -5.2, and 95\% confidence limits of $[-10, 0.5]$. Note that the number of bootstrap replicates is low (`reps=50`); we generally recommend 500 or more to generate more robust estimates.
+
+We can also use the function `RRgof` to calculate the goodness of fit for the three RRT models in the package. For example, we demonstrate how to use `RRgof` on the bulbul logistic regression model above.
+
+```{r bulbul-GLM-gof}
+###==================================================================================
+## Goodness of fit test example: Bulbul hunting
+###==================================================================================
+reps <- 50 # This should be increased for substantive analyses; kept at this low number for convenience
+gof.bulbul <- RRgof(model="univariate", y=huntRRdata['Bulbul'], x=huntRRdata['Age'], p00=p00, p11=p11, reps=reps)
+gof.bulbul$gof.test.result
+
+# For more information use the command below. (Delete the leading hash symbol, #)
+# ?RRgof 
+```
+
+## Sum score modeling
+
+In many applications, practitioners often ask questions regarding multiple sensitive traits. We introduce a method to analyze the prevalence of respondents possessing $[0..K]$ sensitive traits (where $K$ is the number of sensitive traits investigated -- e.g. poaching tigers, blast fishing, poaching rhinos $\Rightarrow K = 3$) [@Cruyff2008SumScore]. 
+
+We can use the `huntRRdata` to evaluate the prevalence of hunting 0, 1, 2, or all 3 bird species.
+
+```{r sumscore_prev}
+###==================================================================================
+## Sum score prevalence: The number of species hunted
+###==================================================================================
+
+RRsumscore(y=huntRRdata[,1:3], p00=p00, p11=p11)$estimates
+```
+
+The results indicate that 16.8\% of the men hunted 1 species, and that less than 1\% of the population hunted all 3 species. However, the confidence limits for $s=3$ are $[0, 5]\%$.
+
+One constraint of the `RRsumscore` and `RRirt` functions is that the `p00` and `p11` values must be the *same* across all of the RRT items. We can see this clearly in the university student dataset, where we can only perform sum score prevalence analysis for subsets of the questions where these values are the same.
+
+```{r sumscore_university}
+###==================================================================================
+## Sum score prevalence: University student behaviors
+###==================================================================================
+
+## Loading the data
+data(RRdata)
+
+## Calculating p00 and p11 for each question (see: ?RRunivariate)
+college.py <- c(1/12, 1/10, 20/30, 1/10, 10/30, 1/12)
+college.p00 <- 1-0.5*college.py # p00 for each question prompt in order
+college.p11 <- 1-0.5*(1-college.py) # p11 for each question prompt in order
+
+## Performing multivariate inference - note that the same values of p00 and p11 are required
+question.indices <- c(1,6)
+    # Sum score model
+RRsumscore(RRdata[,question.indices], p00=college.p00[1], p11=college.p11[1])
+```
+
+### Ordinal regression
+
+`RRsumscore` also permits users to perform ordinal regression. In the context of the `huntRRdata`, we can evaluate whether or not age tended to increase, decrease, or not affect the number of species hunted.
+
+```{r ordinal_reg}
+###==================================================================================
+## Ordinal regression: Age and the number of species hunted
+###==================================================================================
+
+RRsumscore(y=huntRRdata[,c(2,1,3)], x=huntRRdata['Age'], p00=p00, p11=p11)
+```
+
+The output indicates that the elderly were less likely to hunt more species, though the p-value and 95\% confidence interval for $\beta_{age}$ do not indicate a significant, clear, directional impact of age on the sum scores.
+
+We could use bootstrapping here, particularly because $\alpha_2$ has such a large value, indicating that the results were a boundary solution.
+
+```{r ordinal_bootstrap}
+###==================================================================================
+## Ordinal regression bootstrap: Age and the number of species hunted
+###==================================================================================
+
+RRbootstrap(model="sumscore", y=huntRRdata[,c(2,1,3)], x=huntRRdata['Age'], p00=p00, p11=p11, reps=50)
+```
+
+## Item response theory (IRT)
+
+Item response theory in the context of RRT analysis (`RRirt`) assumes that each individual has some propensity towards possessing a sensitive trait, and that each sensitive trait has some "difficulty" associated with it. More difficult traits are more rare. In addition, `RRirt` can perform multivariate regression under the assumption that for any given predictor variable, it has a broadly consistent (positive or negative) effect across all of the traits.
+
+When no covariates are provided, the IRT model yields prevalence estimates for the various traits.
+
+```{r irt_prev}
+###==================================================================================
+## IRT prevalence: rate of hunting each bird species
+###==================================================================================
+
+IRT.MLEs <- RRirt(y=huntRRdata[,c(1:3)], p00=p00, p11=p11)$estimates
+IRT.MLEs[,c(1,2,5,6)] <- IRT.MLEs[,c(1,2,5,6)]*100
+signif(IRT.MLEs, 3)
+```
+
+These results align with those provided by the univariate covariate-free models for each species:
+
+```{r uni_prev3}
+###==================================================================================
+## Univariate prevalence of hunting
+###==================================================================================
+
+uniMLEs <- rbind(RRunivariate(y=huntRRdata['Barbet'], p00=p00, p11=p11)$estimates, # Barbet
+                 RRunivariate(y=huntRRdata['Bulbul'], p00=p00, p11=p11)$estimates, # Bulbul
+                RRunivariate(y=huntRRdata['Partridge'], p00=p00, p11=p11)$estimates) # Partridge
+rownames(uniMLEs) <- c("Barbet","Bulbul","Partridge")
+uniMLEs[,c(1,2,5,6)] <- uniMLEs[,c(1,2,5,6)]*100
+signif(uniMLEs,3)
+```
+
+### IRT multivariate regression
+
+`RRirt` can be used to determine what impact, if any, age has on hunting across all three bird species. By pooling information across all three birds, the $\beta_{age}$ estimate is more efficiently computed than that under the individual univariate logistic regression models.
+
+```{r irt_glm}
+###==================================================================================
+## IRT regression: The effect of age on hunting across multiple bird species
+###==================================================================================
+
+RRirt(y=huntRRdata[,c(3,1,2)], x=huntRRdata['Age'], p00=p00, p11=p11)
+```
+
+Contrast this $\beta_{age}$ against the one returned from a univariate barbet logistic regression, which fails to produce a standard error: `RRunivariate(y=huntRRdata['Barbet'], x=huntRRdata['Age'], p00=p00, p11=p11)$estimates[2,]`.
+
+### Evasive responses
+
+In certain locales, despite implementing RRT, respondents may still feel uneasy answering `yes`, as they may fear reputational or legal repercussions. This phenomenon has been termed **evasive response bias** (represented by parameter $\phi$, or `phi`) and the IRT model can correct prevalence and regression analyses by controlling for the rate of one-way lying (refusing to answer `yes`: `noncompliance=TRUE`). Note that this analysis is not possible with `RRunivariate` or `RRsumscore`. `RRbootstrap` can return bootstrap estimates of the IRT model with evasive response bias.
+
+```{r irt_phi}
+###===========================================================================
+### NONCOMPLIANCE
+###===========================================================================
+
+## Prevalence only
+RRirt(y=huntRRdata[,1:3], p00=p00, p11=p11, noncompliance = TRUE)
+
+## IRT regression
+RRirt(y=huntRRdata[,1:3], x=huntRRdata['Age'],p00=p00, p11=p11, noncompliance = TRUE)
+
+## Bootstrap
+RRbootstrap(model="irt", y=huntRRdata[,1:3], x=huntRRdata['Age'],p00=p00, p11=p11, noncompliance = TRUE, reps=50)
+```
+
+## Power analysis
+
+In designing surveys, researchers may seek to identify what sample size or combination of `p00` and `p11` is necessary to ensure adequate statistical power. We assume that researchers have a rough sense of what the potential rate of a sensitive trait is in a population (from pilot studies, technical reports, expert opinion, or previously published studies). Then if a null expectation is provided (e.g. none of the population possesses the trait), the statistical power of a study design will be returned.
+
+```{r power}
+###===========================================================================
+### POWER ANALYSIS
+###===========================================================================
+
+## An example power analysis for a specific RRT design
+op <- par()
+# Here, we assume that the null is that the sensitive trait is not present. The alternative is that it is present.
+nsim  <- seq(50,  1000, by = 10)  # Simulated vector of possible sample sizes (number of respondents)
+prev  <- c(.02, .05, .1, .2, 0.3) # Vector of possible sensitive trait prevalences
+pi.null <- 0                      # Assuming a null hypothesis of no sensitive trait possession in population
+p00 <- p11 <- 5/6                 # Question design features for randomized response
+RRpwr <- matrix(0, length(nsim), length(prev))
+for (j in 1:length(prev)) {
+    pi.alt <- prev[j]
+    for (i in 1:length(nsim)) {
+         n <- nsim[i]
+         RRpwr[i,j] <- powerRRT(pi.null, pi.alt, p00, p11, n, alternative="greater")
+     }
+}
+     ## Plotting
+colors <- rainbow(length(prev))
+par(mar=c(5,4,2,2),mfrow=c(1,1))
+plot(nsim, RRpwr[, 1], ylim=c(0,1), type="l", xlab="Sample size (n)", ylab="Power", col=colors[1], lwd=1.25)
+grid(col = "lightgray", lty = "dotted", lwd = par("lwd"), equilogs = F)
+for (j in 2:length(prev)) {
+     lines(nsim, RRpwr[,j], col=colors[j])
+}
+legend("bottomright",legend=prev,title=expression(paste("Prevalence: ",pi[alt],"")),lty=rep(1,length(prev)),bty="n",horiz=TRUE, col=colors, title.adj=1, lwd=1.25)
+
+suppressWarnings( par(op) ) # reset plotting parameters
+```
+
+## RRT data simulation
+
+The function `RRsimulate` can simulate univariate or multivariate RRT data under the three model frameworks presented in this package: `univariate, sumscore`, or `irt`. Please see `?RRsimulate` for more detailed information. This function would permit for a rough pre-study analysis of potential regression outcomes for anticipated RRT survey data, or could simply be used to build intuition on the types of data generated by the RRT questioning method, and the functionality of the three analysis functions (`RRunivariate`, `RRsumscore`, `RRirt`)
+
+```{r RRsimulate}
+###===========================================================================
+### NONCOMPLIANCE
+###===========================================================================
+
+## UNIVARIATE SIMULATION - assume a logistic regression covariate of 2 for y ~ x
+UNIdataLR <- RRsimulate(model="univariate",pi.1 = 0.35, p00=4/5, p11=4/5, x.betas=c(2), n=300)
+head(UNIdataLR)
+
+## Analysis
+RRunivariate(y=UNIdataLR[,1], x=UNIdataLR[,2], p00=4/5, p11=4/5)
+```
